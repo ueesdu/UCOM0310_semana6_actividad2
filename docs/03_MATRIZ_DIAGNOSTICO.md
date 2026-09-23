@@ -1,0 +1,15 @@
+# Fase I | Matriz de diagnóstico obligatoria
+
+| # | Ubicación | Smell / problema | Categoría | Impacto | Candidato | Prueba necesaria |
+|---:|---|---|---|---|---|---|
+| 1 | `ServicioReservas.procesar` (todo el método) | Responsabilidades excesivas (Long Class en potencia): valida, calcula tarifa, guarda, notifica y confirma | Clase | Cuatro razones para cambiar en un solo método. Cambiar el correo obliga a tocar el método que calcula el precio | Extract Class: validador, notificador y repositorio | `reservaNormalValidaSeConfirmaYRetorna40` |
+| 2 | `procesar`, llamadas a `r.getCorreo()`, `r.getInicio()` y `r.getFin()` | Feature Envy: el servicio interroga a `Reserva` para decidir reglas de correo y de periodo | Clase | Las reglas del dato viven lejos del dato. Si otra clase necesita la misma regla, la copia | Move Method hacia un concepto del dominio | `correoInvalidoRetornaCeroYNoConfirma`, `periodoInvalidoRetornaCeroYNoConfirma` |
+| 3 | `Reserva`, campos `inicio` y `fin`; condición `!r.getFin().isAfter(r.getInicio())` | Data Clumps: inicio y fin viajan juntos y comparten la regla fin > inicio | Datos | La regla del periodo no tiene nombre ni un único dueño. Se puede repetir mal en otro lugar | Value Object `PeriodoReserva` | `periodoInvalidoRetornaCeroYNoConfirma` (fin igual y fin antes de inicio) |
+| 4 | `Reserva.correo` (String) y `contains("@")` en `procesar` | Primitive Obsession: el correo es un String y su regla está en el servicio | Datos | Cualquier String entra como correo. La validación se repetiría en cada lugar que use correos | Value Object `Correo` o regla con nombre | `correoInvalidoRetornaCeroYNoConfirma`, `correoNuloRetornaCero` |
+| 5 | `Reserva.tipo` (String) y `"VIP".equals(r.getTipo())` | Primitive Obsession y condicional por tipo: "vip" o "PREMIUM" se cobran como NORMAL sin aviso | Datos / Condicional | Agregar un tipo nuevo obliga a editar el servicio. Un error de escritura cambia el precio en silencio | Extraer cálculo de tarifa y luego enum `TipoReserva` | `reservaVipValidaSeConfirmaYRetorna34` |
+| 6 | `procesar`, cuatro `if` con `return 0` y literales `2`, `40`, `0.85` | Condicionales sin intención y números mágicos. El mismo 0 sirve para cuatro fallas distintas | Condicional | El flujo principal queda al final. Cambiar `< 2` por `<= 2` rompe el caso límite y nadie lo nota | Decompose Conditional, constantes con nombre | `dosHorasDeAnticipacionSePermite`, `unaHoraDeAnticipacionRetornaCeroYNoConfirma` |
+| 7 | `System.out.println` de persistencia y correo dentro de `procesar` | Baja testabilidad: los efectos solo existen como texto en consola | Clase (testabilidad) | No se puede comprobar en una prueba si se guardó o se notificó sin leer la consola | Extraer `RepositorioReservas` y `NotificadorReserva` | `reservaValidaMuestraMensajesDeGuardadoYCorreo` |
+
+Además, el constructor de `Reserva` recibe cinco parámetros, dos `String`
+seguidos y dos `LocalDateTime` seguidos (Long Parameter List). Intercambiar
+`correo` con `id`, o `inicio` con `fin`, compila sin error.
