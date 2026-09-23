@@ -159,3 +159,16 @@ mvn exec:java -Dexec.mainClass="edu.uees.refactor.app.LineaBase"
 compila con `maven.compiler.release=17` porque el equipo no tiene JDK 21. El
 código no usa nada posterior a Java 17, así que el cambio no afecta el
 comportamiento.
+
+---
+
+## Laboratorio 2 | Red de seguridad con JUnit 5
+
+```bash
+mvn clean test
+```
+
+La suite `ServicioReservasTest` tiene 8 pruebas de caracterización con
+estructura AAA: los seis escenarios de la línea base, la reserva nula y los
+mensajes de consola. El detalle de cada prueba y el experimento de regresión
+están en `docs/08_RED_SEGURIDAD_JUNIT.md`.
