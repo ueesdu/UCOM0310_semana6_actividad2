@@ -11,6 +11,9 @@ import edu.uees.refactor.domain.Reserva;
  */
 public class ServicioReservas {
 
+    private static final double TARIFA_BASE = 40;
+    private static final double FACTOR_DESCUENTO_VIP = 0.85;
+
     public double procesar(
             Reserva r,
             int horasAnticipacion) {
@@ -34,11 +37,7 @@ public class ServicioReservas {
             return 0;
         }
 
-        double total = 40;
-
-        if ("VIP".equals(r.getTipo())) {
-            total = total * 0.85;
-        }
+        double total = calcularTarifa(r);
 
         System.out.println(
                 "Guardando reserva " + r.getId()
@@ -51,5 +50,12 @@ public class ServicioReservas {
         r.confirmar();
 
         return total;
+    }
+
+    private double calcularTarifa(Reserva r) {
+        if ("VIP".equals(r.getTipo())) {
+            return TARIFA_BASE * FACTOR_DESCUENTO_VIP;
+        }
+        return TARIFA_BASE;
     }
 }
